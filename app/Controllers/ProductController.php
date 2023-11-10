@@ -19,6 +19,47 @@ class ProductController extends BaseController {
         $this->product->insertProductORM($data);
         return redirect()->to('products');
     }
+
+    public function insertProductApi(){
+        $requestData = $this->request->getJSON();
+
+        $validation = $this->validate([
+            'nama_product'=> 'required',
+            'description'=> 'required'
+        ]);
+
+        if(!$validation){
+            $this->response->setStatusCode(400);
+            return $this->response->setJSON([
+                'code' => 400,
+                'status' => "BAD REQUEST",
+                'data' => null
+            ]);
+        }
+        $data = [
+            'nama_product' => $requestData->nama_product,
+            'description' => $requestData->description,
+        ];
+
+        $insert = $this->product->insertProductORM($data);
+        if ($insert){
+            return $this->respond([
+                'code' =>200,
+                'status' => 'OK',
+                'data' => $data
+            ]);
+        }
+
+        $this->response->setStatusCode(500);
+        return $this->response->setJSON(
+            [
+                'code' =>500,
+                'status' => 'INTERNAL SERVER ERROR',
+                'data' => 'null'
+            ]
+        );
+    }
+
     public function insertPage(){
         return view('insertproduct');
     }
@@ -54,11 +95,13 @@ class ProductController extends BaseController {
                 'data' => null
             ]);
         }
+        
         return $this->response->setJSON([
             'code' => 200,
             'status' => "OK",
             'data' => $product
         ]);
+        
     }
 
     public function getProduct($id) {
